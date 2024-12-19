@@ -52,6 +52,9 @@ abstract class Effect() {
         ITEM_FOUNTAIN{
             override fun getTypeClass(): Effect = ItemFountain()
         },
+        ITEM_FOUNTAIN_TRAIL{
+            override fun getTypeClass(): Effect = ItemFountainTrail()
+        },
         ITEM_FOUNTAIN_LINE{
             override fun getTypeClass(): Effect = ItemFountainLine()
         },
@@ -105,6 +108,7 @@ abstract class Effect() {
                                 "An effect with the same identifier already seems to exist")
                     return
                 }
+                plugin.logger.info("load external effect ${effect.getIdentifier()} from ${plugin.name}. ")
                 this.externalEffects[effect.getIdentifier().uppercase()] = me.m64diamondstar.effectmaster.utils.Pair(effect, plugin)
             }
 

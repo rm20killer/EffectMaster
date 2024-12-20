@@ -101,7 +101,7 @@ class ParticleCircleE() : Effect() {
 
     override fun getDefaults(): List<Parameter> {
         val list = ArrayList<Parameter>()
-        list.add(Parameter("Particle", "CLOUD", DefaultDescriptions.PARTICLE, { it.uppercase() }) { it in Particle.entries.map { it.name } })
+        list.add(Parameter("Particle", "CLOUD", "NOT SETUP YET, USE COLOUR", { it.uppercase() }) { it in Particle.entries.map { it.name } })
         list.add(Parameter("Location", "world, 0, 0, 0", DefaultDescriptions.LOCATION, { it }) { LocationUtils.getLocationFromString(it) != null })
         list.add(Parameter("Amount", 50, "The amount of particles to spawn.", { it.toInt() }) { it.toIntOrNull() != null && it.toInt() >= 0 })
         list.add(Parameter("Radius", 2.0, "The radius of the particle circle.", { it.toDouble() }) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })

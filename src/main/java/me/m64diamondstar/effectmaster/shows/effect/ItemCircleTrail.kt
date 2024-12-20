@@ -77,14 +77,15 @@ class ItemCircleTrail() : Effect() {
             ).getInt("Lifetime") else 40
             val particle = getSection(effectShow, id).getString("Particle")?.let { Particle.valueOf(it.uppercase()) } ?: return
             val radius = getSection(effectShow, id).getDouble("Radius") ?: 2.0 // Radius of the circle
-            val gravity = getSection(effectShow, id).getDouble("Gravity") ?: 2.0
+            val dX = if (getSection(effectShow, id).get("dX") != null) getSection(effectShow, id).getDouble("dX") else 0.0
+            val dY = if (getSection(effectShow, id).get("dY") != null) getSection(effectShow, id).getDouble("dY") else 0.0
+            val dZ = if (getSection(effectShow, id).get("dZ") != null) getSection(effectShow, id).getDouble("dZ") else 0.0
             object : BukkitRunnable() {
                 var c = 0
                 val items = mutableListOf<Item>()
 
                 override fun run() {
                     if (c < duration) {
-
                         repeat(amount) {
                             //circle
                             val angle = (2 * Math.PI * it) / amount
@@ -150,7 +151,7 @@ class ItemCircleTrail() : Effect() {
                     for (item in items.toList()) {
                         if (item.isValid) {
                             val itemLocation = item.location
-                            itemLocation.world!!.spawnParticle(particle, itemLocation,1, 0.0, 0.0, 0.0,0.0, null, true)
+                            itemLocation.world!!.spawnParticle(particle, itemLocation,1, dX, dY, dY,0.0, null, true)
                         }
                         else
                         {
@@ -250,12 +251,9 @@ class ItemCircleTrail() : Effect() {
                 DefaultDescriptions.DELAY,
                 { it.toInt() }) { it.toLongOrNull() != null && it.toLong() >= 0 })
         list.add(Parameter("Particle", "END_ROD", DefaultDescriptions.PARTICLE, {it.uppercase()}) { it in Particle.entries.map { it.name } })
-        list.add(
-            Parameter(
-                "Gravity",
-                0.08,
-                "The gravity of the item.",
-                { it.toDouble() }) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
+        list.add(Parameter("dX", 0.1, "The delta X, the value of this decides how much the area where the particle spawns will extend over the x-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
+        list.add(Parameter("dY", 0.1, "The delta Y, the value of this decides how much the area where the particle spawns will extend over the y-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
+        list.add(Parameter("dZ", 0.1, "The delta Z, the value of this decides how much the area where the particle spawns will extend over the z-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
         return list
     }
 }

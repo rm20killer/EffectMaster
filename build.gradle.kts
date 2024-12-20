@@ -4,6 +4,8 @@ plugins {
     id("maven-publish")
     id("org.jetbrains.kotlin.jvm") version "1.9.20"
     id("org.jetbrains.dokka") version "1.9.20"
+    id("com.gradleup.shadow") version "9.0.0-beta4"
+
 }
 
 val groupName = "me.M64DiamondStar"
@@ -34,10 +36,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
+    implementation("org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("com.bergerkiller.bukkit:TrainCarts:1.19.2-v1-SNAPSHOT")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
+    shadow(files("libs/particlesfx-1.21.jar"))
 }
 
 val targetJavaVersion = 17
@@ -79,4 +82,20 @@ publishing {
 tasks.wrapper {
     gradleVersion = "8.5"
     distributionType = Wrapper.DistributionType.ALL
+}
+
+tasks {
+    shadowJar {
+        // Relocate dependencies to avoid conflicts (optional but recommended)
+        relocate("hm.zelha.particlesfx", "me.M64DiamondStar.effectmaster.libs.particlesfx")
+        mergeServiceFiles()
+        configurations = listOf(project.configurations.getByName("shadow"))
+        // Configure the output JAR name
+        archiveFileName.set("EffectMaster-${project.version}.jar")
+    }
+
+    // Make the build task depend on shadowJar
+    build {
+        dependsOn(shadowJar)
+    }
 }

@@ -69,7 +69,7 @@ class ItemFountain() : Effect() {
 
                     repeat(amount) {
                         // Create item
-                        val item = location.world!!.spawnEntity(location, EntityType.DROPPED_ITEM) as Item
+                        val item = location.world!!.spawnEntity(location, EntityType.ITEM) as Item
                         item.pickupDelay = Integer.MAX_VALUE
                         item.isPersistent = false
                         item.persistentDataContainer.set(

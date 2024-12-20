@@ -42,7 +42,7 @@ class ParticleEmitter() : Effect() {
 
             when (particle) {
 
-                Particle.REDSTONE, Particle.SPELL_MOB, Particle.SPELL_MOB_AMBIENT -> {
+                Particle.DUST -> {
                     val color = Colors.getJavaColorFromString(getSection(effectShow, id).getString("Color")!!) ?: java.awt.Color(0, 0, 0)
                     val dustOptions = Particle.DustOptions(
                         Color.fromRGB(color.red, color.green, color.blue),
@@ -77,7 +77,7 @@ class ParticleEmitter() : Effect() {
                     }.runTaskTimerAsynchronously(EffectMaster.plugin(), 0L, 1L)
                 }
 
-                Particle.BLOCK_CRACK, Particle.BLOCK_DUST, Particle.FALLING_DUST -> {
+                Particle.FALLING_DUST -> {
                     val material =
                         if (getSection(effectShow, id).get("Block") != null) Material.valueOf(getSection(effectShow, id).getString("Block")!!.uppercase()) else Material.STONE
                     object: BukkitRunnable(){
@@ -107,35 +107,7 @@ class ParticleEmitter() : Effect() {
                     }.runTaskTimerAsynchronously(EffectMaster.plugin(), 0L, 1L)
                 }
 
-                Particle.ITEM_CRACK -> {
-                    val material =
-                        if (getSection(effectShow, id).get("Block") != null) Material.valueOf(getSection(effectShow, id).getString("Block")!!.uppercase()) else Material.STONE
-                    object: BukkitRunnable(){
-                        var c = 0
-                        override fun run() {
 
-                            if(c == duration){
-                                this.cancel()
-                                return
-                            }
-                            if(players == null) {
-                                location.world!!.spawnParticle(
-                                    particle, location,
-                                    if (startUp > 0.0 && c <= startUp) (c.toDouble() / startUp * amount.toDouble()).roundToInt() else amount,
-                                    dX, dY, dZ, extra, ItemStack(material), force
-                                )
-                            }else{
-                                players.forEach {
-                                    it.spawnParticle(
-                                        particle, location,
-                                        if (startUp > 0.0 && c <= startUp) (c.toDouble() / startUp * amount.toDouble()).roundToInt() else amount,
-                                        dX, dY, dZ, extra, ItemStack(material))
-                                }
-                            }
-                            c++
-                        }
-                    }.runTaskTimerAsynchronously(EffectMaster.plugin(), 0L, 1L)
-                }
 
                 else -> {
                     object: BukkitRunnable(){

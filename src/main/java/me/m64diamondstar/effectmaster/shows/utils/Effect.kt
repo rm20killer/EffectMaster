@@ -49,6 +49,9 @@ abstract class Effect() {
         FOUNTAIN_PATH {
             override fun getTypeClass(): Effect = FountainPath()
         },
+        ITEM_CIRCLE_TRAIL{
+            override fun getTypeClass(): Effect = ItemCircleTrail()
+        },
         ITEM_FOUNTAIN{
             override fun getTypeClass(): Effect = ItemFountain()
         },
@@ -63,6 +66,9 @@ abstract class Effect() {
         },
         PARTICLE {
             override fun getTypeClass(): Effect = Particle()
+        },
+        PARTICLE_CIRCLE{
+            override fun getTypeClass(): Effect = ParticleCircleE()
         },
         PARTICLE_EMITTER {
             override fun getTypeClass(): Effect = ParticleEmitter()

@@ -145,7 +145,7 @@ class ItemFountainPath() : Effect() {
     private fun spawnItem(location: Location, material: Material, customModelData: Int, lifetime: Int, randomizer: Double,
                           velocity: Vector, players: List<Player>?) {
 // Create item
-        val item = location.world!!.spawnEntity(location, EntityType.DROPPED_ITEM) as Item
+        val item = location.world!!.spawnEntity(location, EntityType.ITEM) as Item
         item.pickupDelay = Integer.MAX_VALUE
         item.isPersistent = false
         item.persistentDataContainer.set(NamespacedKey(EffectMaster.plugin(), "effectmaster-entity"),

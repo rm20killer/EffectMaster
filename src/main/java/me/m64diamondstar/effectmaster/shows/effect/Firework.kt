@@ -51,7 +51,7 @@ class Firework() : Effect() {
             shape = if(getSection(effectShow, id).get("FireworkShape") != null) FireworkEffect.Type.valueOf(getSection(effectShow, id).getString("FireworkShape")!!) else FireworkEffect.Type.BALL
         }catch (_: NullPointerException){ }
 
-        val firework = location.world!!.spawnEntity(location, EntityType.FIREWORK) as Firework
+        val firework = location.world!!.spawnEntity(location, EntityType.FIREWORK_ROCKET) as Firework
         val fireworkMeta = firework.fireworkMeta
 
         try {

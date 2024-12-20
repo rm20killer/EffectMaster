@@ -4,28 +4,25 @@ import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketContainer
 import me.m64diamondstar.effectmaster.EffectMaster
-import me.m64diamondstar.effectmaster.shows.utils.Effect
-import me.m64diamondstar.effectmaster.shows.EffectShow
-import me.m64diamondstar.effectmaster.shows.utils.ShowUtils
 import me.m64diamondstar.effectmaster.locations.LocationUtils
-import me.m64diamondstar.effectmaster.shows.utils.DefaultDescriptions
-import me.m64diamondstar.effectmaster.shows.utils.Parameter
-import me.m64diamondstar.effectmaster.shows.utils.ShowSetting
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
+import me.m64diamondstar.effectmaster.shows.EffectShow
+import me.m64diamondstar.effectmaster.shows.utils.*
+import me.m64diamondstar.effectmaster.shows.utils.Effect
+import org.bukkit.*
 import org.bukkit.Particle
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.Item
-import org.bukkit.entity.Player
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeModifier.Operation;
+import org.bukkit.entity.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
+import java.util.*
 import kotlin.random.Random
 
-class ItemFountainTrail() : Effect() {
+
+class ItemCircleTrail() : Effect() {
 
     override fun execute(players: List<Player>?, effectShow: EffectShow, id: Int, settings: Set<ShowSetting>) {
         try {
@@ -79,7 +76,8 @@ class ItemFountainTrail() : Effect() {
                 id
             ).getInt("Lifetime") else 40
             val particle = getSection(effectShow, id).getString("Particle")?.let { Particle.valueOf(it.uppercase()) } ?: return
-
+            val radius = getSection(effectShow, id).getDouble("Radius") ?: 2.0 // Radius of the circle
+            val gravity = getSection(effectShow, id).getDouble("Gravity") ?: 2.0
             object : BukkitRunnable() {
                 var c = 0
                 val items = mutableListOf<Item>()
@@ -88,8 +86,14 @@ class ItemFountainTrail() : Effect() {
                     if (c < duration) {
 
                         repeat(amount) {
+                            //circle
+                            val angle = (2 * Math.PI * it) / amount
+                            val x = radius * Math.cos(angle)
+                            val z = radius * Math.sin(angle)
+                            val spawnLocation = location.clone().add(x, 0.0, z)
+
                             // Create item
-                            val item = location.world!!.spawnEntity(location, EntityType.ITEM) as Item
+                            val item = location.world!!.spawnEntity(spawnLocation, EntityType.ITEM) as Item
                             item.pickupDelay = Integer.MAX_VALUE
                             item.isPersistent = false
                             item.persistentDataContainer.set(
@@ -104,16 +108,20 @@ class ItemFountainTrail() : Effect() {
                             }
 
                             // Fix velocity
-                            if (randomizer != 0.0)
-                                item.velocity = Vector(
-                                    velocity.x + Random.nextInt(0, 1000)
-                                        .toDouble() / 1000 * randomizer * 2 - randomizer,
-                                    velocity.y + Random.nextInt(0, 1000)
-                                        .toDouble() / 1000 * randomizer * 2 - randomizer / 3,
-                                    velocity.z + Random.nextInt(0, 1000).toDouble() / 1000 * randomizer * 2 - randomizer
-                                )
-                            else
-                                item.velocity = velocity
+                            //calc outwards velocity
+                            val outwardVector = Vector(x, 0.0, z).normalize() // Direction away from center
+                            val finalVelocity = outwardVector.multiply(velocity.length()) // Scale to original velocity magnitude
+
+                            if (randomizer != 0.0) {
+                                val randomX = Random.nextInt(0, 1000).toDouble() / 1000 * randomizer * 2 - randomizer
+                                val randomY = Random.nextInt(0, 1000).toDouble() / 1000 * randomizer * 2 - randomizer / 3
+                                val randomZ = Random.nextInt(0, 1000).toDouble() / 1000 * randomizer * 2 - randomizer
+                                item.velocity = finalVelocity.add(Vector(randomX, randomY, randomZ))
+                            } else {
+                                item.velocity = finalVelocity
+                            }
+
+
 
                             // Register dropped item (this prevents it from merging with others)
                             ShowUtils.addDroppedItem(item)
@@ -164,15 +172,15 @@ class ItemFountainTrail() : Effect() {
     }
 
     override fun getIdentifier(): String {
-        return "ITEM_FOUNTAIN_TRAIL"
+        return "ITEM_CIRCLE_TRAIL"
     }
 
     override fun getDisplayMaterial(): Material {
-        return Material.SPLASH_POTION
+        return Material.LIME_WOOL
     }
 
     override fun getDescription(): String {
-        return "Spawns a fountain of dropped items with customizable velocity."
+        return "Spawns a circle of dropped items and add a trail."
     }
 
     override fun isSync(): Boolean {
@@ -187,6 +195,12 @@ class ItemFountainTrail() : Effect() {
                 "world, 0, 0, 0",
                 DefaultDescriptions.LOCATION,
                 { it }) { LocationUtils.getLocationFromString(it) != null })
+        list.add(
+            Parameter(
+                "Radius",
+                2.0,
+                "The radius of the circle where items will spawn.",
+                { it.toDouble() }) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
         list.add(
             Parameter(
                 "Velocity",
@@ -236,7 +250,12 @@ class ItemFountainTrail() : Effect() {
                 DefaultDescriptions.DELAY,
                 { it.toInt() }) { it.toLongOrNull() != null && it.toLong() >= 0 })
         list.add(Parameter("Particle", "END_ROD", DefaultDescriptions.PARTICLE, {it.uppercase()}) { it in Particle.entries.map { it.name } })
-
+        list.add(
+            Parameter(
+                "Gravity",
+                0.08,
+                "The gravity of the item.",
+                { it.toDouble() }) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
         return list
     }
 }

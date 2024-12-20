@@ -51,7 +51,7 @@ class SoundEmitter() : Effect() {
                             location.world?.playSound(location, sound, SoundCategory.valueOf(source), volume, pitch)
 
                     else {
-                        val minecartCommand = location.world?.spawnEntity(location, EntityType.MINECART_COMMAND)
+                        val minecartCommand = location.world?.spawnEntity(location, EntityType.COMMAND_BLOCK_MINECART)
                         EffectMaster.plugin().server.selectEntities(minecartCommand as CommandSender, selector).forEach {
                             if (it is Player)
                                 if (players != null) {

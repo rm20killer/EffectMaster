@@ -36,7 +36,7 @@ class Particle() : Effect() {
 
 
             when (particle) {
-                Particle.REDSTONE, Particle.SPELL_MOB, Particle.SPELL_MOB_AMBIENT -> {
+                Particle.DUST -> {
                     val color = Colors.getJavaColorFromString(getSection(effectShow, id).getString("Color")!!) ?: java.awt.Color(0, 0, 0)
                     val dustOptions = Particle.DustOptions(
                         Color.fromRGB(color.red, color.green, color.blue),
@@ -54,7 +54,7 @@ class Particle() : Effect() {
                     }
                 }
 
-                Particle.BLOCK_CRACK, Particle.BLOCK_DUST, Particle.FALLING_DUST -> {
+               Particle.FALLING_DUST -> {
                     val material =
                         if (getSection(effectShow, id).get("Block") != null) Material.valueOf(getSection(effectShow, id).getString("Block")!!.uppercase()) else Material.STONE
                     if(players == null) {
@@ -66,17 +66,7 @@ class Particle() : Effect() {
                     }
                 }
 
-                Particle.ITEM_CRACK -> {
-                    val material =
-                        if (getSection(effectShow, id).get("Block") != null) Material.valueOf(getSection(effectShow, id).getString("Block")!!.uppercase()) else Material.STONE
-                    if(players == null) {
-                        location.world!!.spawnParticle(particle, location, amount, dX, dY, dZ, extra, ItemStack(material), force)
-                    }else{
-                        players.forEach {
-                            it.spawnParticle(particle, location, amount, dX, dY, dZ, extra, ItemStack(material))
-                        }
-                    }
-                }
+
 
                 else -> {
                     if(players == null) {

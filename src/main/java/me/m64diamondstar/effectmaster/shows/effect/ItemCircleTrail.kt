@@ -1,5 +1,6 @@
 package me.m64diamondstar.effectmaster.shows.effect
 
+
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.events.PacketContainer
@@ -18,7 +19,10 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
+import org.joml.Matrix4f
 import java.util.*
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.random.Random
 
 
@@ -80,6 +84,12 @@ class ItemCircleTrail() : Effect() {
             val dX = if (getSection(effectShow, id).get("dX") != null) getSection(effectShow, id).getDouble("dX") else 0.0
             val dY = if (getSection(effectShow, id).get("dY") != null) getSection(effectShow, id).getDouble("dY") else 0.0
             val dZ = if (getSection(effectShow, id).get("dZ") != null) getSection(effectShow, id).getDouble("dZ") else 0.0
+            val speed = if (getSection(effectShow, id).get("Speed") != null) getSection(effectShow, id).getDouble("dZ") else 0.0
+            val pitch = getSection(effectShow, id).getDouble("Pitch") ?: 0.0
+            val yaw = getSection(effectShow, id).getDouble("Yaw") ?: 0.0
+            val roll = getSection(effectShow, id).getDouble("Roll") ?: 0.0
+            val gravity = if (getSection(effectShow, id).get("Gravity") != null) getSection(effectShow, id).getBoolean("Gravity") else false
+            val gravityLife = if (getSection(effectShow, id).get("GravityLife") != null) getSection(effectShow, id).getInt("GravityLife") else 0.0
             object : BukkitRunnable() {
                 var c = 0
                 val items = mutableListOf<Item>()
@@ -89,10 +99,29 @@ class ItemCircleTrail() : Effect() {
                         repeat(amount) {
                             //circle
                             val angle = (2 * Math.PI * it) / amount
-                            val x = radius * Math.cos(angle)
-                            val z = radius * Math.sin(angle)
-                            val spawnLocation = location.clone().add(x, 0.0, z)
 
+                            val x = radius * cos(angle + Math.toRadians(roll))
+                            val z = radius * sin(angle + Math.toRadians(roll))
+
+                            val offset = Vector(x, 0.0, z)
+//                            println("offset Vector: $offset")
+                            val pitchRotated = Vector(
+                                offset.x,
+                                offset.y * cos(Math.toRadians(pitch)) - offset.z * sin(Math.toRadians(pitch)),
+                                offset.y * sin(Math.toRadians(pitch)) + offset.z * cos(Math.toRadians(pitch))
+                            )
+//                            println("Pitch-Rotated Vector: $pitchRotated")
+
+                            // THEN apply yaw rotation
+                            val rotatedOffset = Vector(
+                                pitchRotated.x * cos(Math.toRadians(yaw)) - pitchRotated.z * sin(Math.toRadians(yaw)),
+                                pitchRotated.y,
+                                pitchRotated.x * sin(Math.toRadians(yaw)) + pitchRotated.z * cos(Math.toRadians(yaw))
+                            )
+//                            println("Yaw-Rotated Vector: $rotatedOffset")
+
+                            val spawnLocation = location.clone().add(rotatedOffset)
+//                            println("spawnLocation: $spawnLocation")
                             // Create item
                             val item = location.world!!.spawnEntity(spawnLocation, EntityType.ITEM) as Item
                             item.pickupDelay = Integer.MAX_VALUE
@@ -110,9 +139,10 @@ class ItemCircleTrail() : Effect() {
 
                             // Fix velocity
                             //calc outwards velocity
-                            val outwardVector = Vector(x, 0.0, z).normalize() // Direction away from center
-                            val finalVelocity = outwardVector.multiply(velocity.length()) // Scale to original velocity magnitude
+                            var outwardVector = rotatedOffset.clone().normalize()
+                            val finalVelocity = outwardVector.multiply(velocity.length())
 
+                            // Apply randomizer to velocity
                             if (randomizer != 0.0) {
                                 val randomX = Random.nextInt(0, 1000).toDouble() / 1000 * randomizer * 2 - randomizer
                                 val randomY = Random.nextInt(0, 1000).toDouble() / 1000 * randomizer * 2 - randomizer / 3
@@ -121,7 +151,8 @@ class ItemCircleTrail() : Effect() {
                             } else {
                                 item.velocity = finalVelocity
                             }
-
+                            //gravity
+                            item.setGravity(gravity)
 
 
                             // Register dropped item (this prevents it from merging with others)
@@ -151,7 +182,11 @@ class ItemCircleTrail() : Effect() {
                     for (item in items.toList()) {
                         if (item.isValid) {
                             val itemLocation = item.location
-                            itemLocation.world!!.spawnParticle(particle, itemLocation,1, dX, dY, dY,0.0, null, true)
+                            if(duration==gravityLife)
+                            {
+                                item.setGravity(!gravity)
+                            }
+                            itemLocation.world!!.spawnParticle(particle, itemLocation,1, dX, dY, dZ,speed, null, true)
                         }
                         else
                         {
@@ -254,6 +289,17 @@ class ItemCircleTrail() : Effect() {
         list.add(Parameter("dX", 0.1, "The delta X, the value of this decides how much the area where the particle spawns will extend over the x-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
         list.add(Parameter("dY", 0.1, "The delta Y, the value of this decides how much the area where the particle spawns will extend over the y-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
         list.add(Parameter("dZ", 0.1, "The delta Z, the value of this decides how much the area where the particle spawns will extend over the z-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
+        list.add(Parameter("Speed", 0.0, "Speed of particle", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
+        list.add(Parameter("Gravity", false, "Wither the item should have gravity", {it.toBoolean()}) { it.toBooleanStrictOrNull() != null })
+        list.add(Parameter("Pitch", 0.0, "The pitch rotation of the particle circle.", { it.toDouble() }) { it.toDoubleOrNull() != null })
+        list.add(Parameter("Yaw", 0.0, "The yaw rotation of the particle circle.", { it.toDouble() }) { it.toDoubleOrNull() != null })
+        list.add(Parameter("Roll", 0.0, "The roll rotation of the particle circle.", { it.toDouble() }) { it.toDoubleOrNull() != null })
+        list.add(
+            Parameter(
+                "GravityLife",
+                0,
+                "How long gravity should be off. 0 is disabled.",
+                { it.toInt() }) { it.toIntOrNull() != null && it.toInt() >= 0 })
         return list
     }
 }

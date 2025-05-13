@@ -58,6 +58,9 @@ abstract class Effect() {
         ITEM_FOUNTAIN_TRAIL{
             override fun getTypeClass(): Effect = ItemFountainTrail()
         },
+        ITEM_FOUNTAIN_TRAIL_COLOUR{
+            override fun getTypeClass(): Effect = ItemFountainTrailColour()
+        },
         ITEM_FOUNTAIN_LINE{
             override fun getTypeClass(): Effect = ItemFountainLine()
         },

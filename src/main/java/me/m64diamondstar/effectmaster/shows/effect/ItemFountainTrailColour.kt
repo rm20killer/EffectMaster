@@ -11,6 +11,7 @@ import me.m64diamondstar.effectmaster.locations.LocationUtils
 import me.m64diamondstar.effectmaster.shows.utils.DefaultDescriptions
 import me.m64diamondstar.effectmaster.shows.utils.Parameter
 import me.m64diamondstar.effectmaster.shows.utils.ShowSetting
+import me.m64diamondstar.effectmaster.utils.Colors
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -23,9 +24,10 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
+import java.awt.Color
 import kotlin.random.Random
 
-class ItemFountainTrail() : Effect() {
+class ItemFountainTrailColour() : Effect() {
 
     override fun execute(players: List<Player>?, effectShow: EffectShow, id: Int, settings: Set<ShowSetting>) {
         try {
@@ -78,13 +80,15 @@ class ItemFountainTrail() : Effect() {
                 effectShow,
                 id
             ).getInt("Lifetime") else 40
-            val particle = getSection(effectShow, id).getString("Particle")?.let { Particle.valueOf(it.uppercase()) } ?: return
+            val size = if (getSection(effectShow, id).get("Size") != null) getSection(effectShow, id).getInt("Size").toFloat() else 1.0f
 
-            val dX = if (getSection(effectShow, id).get("dX") != null) getSection(effectShow, id).getDouble("dX") else 0.0
-            val dY = if (getSection(effectShow, id).get("dY") != null) getSection(effectShow, id).getDouble("dY") else 0.0
-            val dZ = if (getSection(effectShow, id).get("dZ") != null) getSection(effectShow, id).getDouble("dZ") else 0.0
-            val speed = if (getSection(effectShow, id).get("Speed") != null) getSection(effectShow, id).getDouble("dZ") else 0.0
 
+            val particle = Particle.valueOf("DUST")
+            val color = randomBrightColor()
+            val dustOptions = Particle.DustOptions(
+                org.bukkit.Color.fromRGB(color.red, color.green, color.blue),
+                size
+            )
             object : BukkitRunnable() {
                 var c = 0
                 val items = mutableListOf<Item>()
@@ -147,7 +151,7 @@ class ItemFountainTrail() : Effect() {
                     for (item in items.toList()) {
                         if (item.isValid) {
                             val itemLocation = item.location
-                            itemLocation.world!!.spawnParticle(particle, itemLocation,1, dX, dY, dZ,speed, null, true)
+                            itemLocation.world!!.spawnParticle(particle, itemLocation,1, 0.0, 0.0, 0.0,0.0, dustOptions, true)
                         }
                         else
                         {
@@ -169,11 +173,11 @@ class ItemFountainTrail() : Effect() {
     }
 
     override fun getIdentifier(): String {
-        return "ITEM_FOUNTAIN_TRAIL"
+        return "ITEM_FOUNTAIN_TRAIL_COLOUR"
     }
 
     override fun getDisplayMaterial(): Material {
-        return Material.SPLASH_POTION
+        return Material.RED_DYE
     }
 
     override fun getDescription(): String {
@@ -234,18 +238,29 @@ class ItemFountainTrail() : Effect() {
                 1,
                 "The amount of blocks to spawn each tick.",
                 { it.toInt() }) { it.toIntOrNull() != null && it.toInt() >= 0 })
+        list.add(Parameter("Size", 0.5f, "The size of the particle, only works for REDSTONE, SPELL_MOB and SPELL_MOB_AMBIENT.", {it.toFloat()}) { it.toFloatOrNull() != null && it.toFloat() >= 0.0 })
         list.add(
             Parameter(
                 "Delay",
                 0,
                 DefaultDescriptions.DELAY,
                 { it.toInt() }) { it.toLongOrNull() != null && it.toLong() >= 0 })
-        list.add(Parameter("Particle", "END_ROD", DefaultDescriptions.PARTICLE, {it.uppercase()}) { it in Particle.entries.map { it.name } })
-        list.add(Parameter("dX", 0.1, "The delta X, the value of this decides how much the area where the particle spawns will extend over the x-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
-        list.add(Parameter("dY", 0.1, "The delta Y, the value of this decides how much the area where the particle spawns will extend over the y-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
-        list.add(Parameter("dZ", 0.1, "The delta Z, the value of this decides how much the area where the particle spawns will extend over the z-axis.", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
-        list.add(Parameter("Speed", 0.0, "Speed of particle", {it.toDouble()}) { it.toDoubleOrNull() != null && it.toDouble() >= 0.0 })
         return list
 
+    }
+
+    fun randomBrightColor(): Color {
+        while (true) {
+            val red = Random.nextInt(256)
+            val green = Random.nextInt(256)
+            val blue = Random.nextInt(256)
+
+            // Check if the color is bright enough (adjust threshold as needed)
+            if ((red > 150 || green > 150 || blue > 150) &&
+                (Math.abs(red - green) > 50 || Math.abs(red - blue) > 50 || Math.abs(green - blue) > 50)
+            ) {
+                return java.awt.Color(red, green, blue)
+            }
+        }
     }
 }

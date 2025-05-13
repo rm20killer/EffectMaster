@@ -34,18 +34,25 @@ class ParticleCircleE() : Effect() {
             val amount = if (getSection(effectShow, id).get("Amount") != null) getSection(effectShow, id).getInt("Amount") else 0
             val color = Colors.getJavaColorFromString(getSection(effectShow, id).getString("Color")!!) ?: java.awt.Color(0, 0, 0)
             val radius = getSection(effectShow, id).getDouble("Radius") ?: 2.0  // Default radius
-            val pitch = getSection(effectShow, id).getDouble("Pitch") ?: 0.0
-            val yaw = getSection(effectShow, id).getDouble("Yaw") ?: 0.0
-            val roll = getSection(effectShow, id).getDouble("Roll") ?: 0.0
+            var pitch = getSection(effectShow, id).getDouble("Pitch") ?: 0.0
+            var yaw = getSection(effectShow, id).getDouble("Yaw") ?: 0.0
+            var roll = getSection(effectShow, id).getDouble("Roll") ?: 0.0
             val particleFrequency = getSection(effectShow, id).getInt("ParticleFrequency") ?: 50
-
+            val randomDirection = getSection(effectShow, id).getBoolean("RandomDirection") ?: false
             val duration = if (getSection(effectShow, id).get("Duration") != null) getSection(effectShow, id).getInt("Duration") else {
                 if (getSection(effectShow, id).get("Length") != null) getSection(effectShow, id).getInt("Length") else 20
             }
 
-            val force = if (getSection(effectShow, id).get("Force") != null) getSection(effectShow, id).getBoolean("Force") else false
-            val extra = if (amount == 0) 1.0 else 0.0
+            if(randomDirection)
+            {
+                pitch = (Math.random() * 360).toDouble()
+                yaw = (Math.random() * 360).toDouble()
+                roll = (Math.random() * 360).toDouble()
+            }
             val particleSFXP = ParticleDustColored(Color(color.red, color.green, color.blue))
+
+
+            //
             val circle = ParticleCircle(
                 particleSFXP, // Use the converted Particle enum value here
                 LocationSafe(location),
@@ -65,7 +72,8 @@ class ParticleCircleE() : Effect() {
                         this.cancel()
                         return
                     }
-                    currentRadius = (radius / duration) * c
+                    //logarithmic
+                    currentRadius = radius * (Math.log(c.toDouble() + 1) / Math.log(duration.toDouble() + 1))
                     circle.xRadius = currentRadius
                     circle.zRadius = currentRadius
                     circle.display()
@@ -115,6 +123,8 @@ class ParticleCircleE() : Effect() {
         list.add(Parameter("Block", "STONE", "The block id of the particle, only works for BLOCK_CRACK, BLOCK_DUST, FALLING_DUST and ITEM_CRACK.", { it.uppercase() }) { Material.entries.any { mat -> it.equals(mat.name, ignoreCase = true) } })
         list.add(Parameter("Duration", 20, DefaultDescriptions.DURATION, {it.toInt()}) { it.toLongOrNull() != null && it.toLong() >= 0 })
         list.add(Parameter("Delay", 0, DefaultDescriptions.DELAY, { it.toInt() }) { it.toLongOrNull() != null && it.toLong() >= 0 })
+        list.add(Parameter("RandomDirection", false, "Adds random direction to the particle", {it.toBoolean()}) { it.toBooleanStrictOrNull() != null })
+
         return list
     }
 

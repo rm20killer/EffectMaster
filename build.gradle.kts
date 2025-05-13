@@ -10,7 +10,7 @@ plugins {
 
 val groupName = "me.M64DiamondStar"
 val artifactName = "EffectMaster"
-val pluginVersion = "1.4.7"
+val pluginVersion = "1.4.9"
 
 group = groupName
 description = artifactName
@@ -37,7 +37,7 @@ repositories {
 
 dependencies {
     implementation("org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT")
-    compileOnly("com.bergerkiller.bukkit:TrainCarts:1.19.2-v1-SNAPSHOT")
+    implementation("com.bergerkiller.bukkit:TrainCarts:1.21.1-v1-SNAPSHOT")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
     shadow(files("libs/particlesfx-1.21.jar"))
@@ -88,6 +88,7 @@ tasks {
     shadowJar {
         // Relocate dependencies to avoid conflicts (optional but recommended)
         relocate("hm.zelha.particlesfx", "me.M64DiamondStar.effectmaster.libs.particlesfx")
+        relocate("com.bergerkiller.bukkit.common","me.M64DiamondStar.effectmaster.libs.bukkit.common")
         mergeServiceFiles()
         configurations = listOf(project.configurations.getByName("shadow"))
         // Configure the output JAR name

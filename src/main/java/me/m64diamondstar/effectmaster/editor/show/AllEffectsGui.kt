@@ -113,7 +113,7 @@ class AllEffectsGui(private val player: Player, effectShow: EffectShow, private 
                     lore.add(Colors.format("&r#e0e0e0&o$sectionString"))
                 }
                 meta.lore = lore
-                meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS)
+                meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
 
                 item.itemMeta = meta
 

@@ -1,6 +1,6 @@
 package me.m64diamondstar.effectmaster
-
 import com.tcoded.folialib.FoliaLib
+import hm.zelha.particlesfx.util.ParticleSFX
 import me.m64diamondstar.effectmaster.commands.EffectMasterCommand
 import me.m64diamondstar.effectmaster.commands.EffectMasterTabCompleter
 import me.m64diamondstar.effectmaster.commands.utils.SubCommandRegistry
@@ -64,7 +64,7 @@ class EffectMaster : JavaPlugin() {
 
         // Try to load dependencies
         loadDependencies()
-
+        ParticleSFX.setPlugin(this)
         // Try to register TrainCarts signs (does nothing if plugin isn't loaded)
         if(isTrainCartsLoaded) {
             SignRegistry.registerSigns()

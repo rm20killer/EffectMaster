@@ -116,7 +116,7 @@ class EditShowGui(private val player: Player, effectShow: EffectShow): Gui(playe
                     lore.add(Colors.format("#a8a8a8$section: &r#e0e0e0&o${effect.getSection(effectShow, id).get(section).toString()}"))
                 }
                 meta.lore = lore
-                meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS)
+                meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
 
                 item.itemMeta = meta
 
@@ -173,7 +173,7 @@ class EditShowGui(private val player: Player, effectShow: EffectShow): Gui(playe
                     lore.add(Colors.format("#a8a8a8$section: &r#e0e0e0&o${effect.getSection(effectShow, id)[section].toString()}"))
                 }
                 meta.lore = lore
-                meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS)
+                meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
 
                 item.itemMeta = meta
 
@@ -241,7 +241,7 @@ class EditShowGui(private val player: Player, effectShow: EffectShow): Gui(playe
             lore.add(" ")
             lore.add(Colors.format(Colors.Color.SUCCESS.toString() + "Click to edit!"))
             meta.lore = lore
-            meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS)
+            meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
 
             item.itemMeta = meta
 

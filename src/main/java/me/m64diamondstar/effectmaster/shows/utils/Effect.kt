@@ -49,8 +49,17 @@ abstract class Effect() {
         FOUNTAIN_PATH {
             override fun getTypeClass(): Effect = FountainPath()
         },
+        ITEM_CIRCLE_TRAIL{
+            override fun getTypeClass(): Effect = ItemCircleTrail()
+        },
         ITEM_FOUNTAIN{
             override fun getTypeClass(): Effect = ItemFountain()
+        },
+        ITEM_FOUNTAIN_TRAIL{
+            override fun getTypeClass(): Effect = ItemFountainTrail()
+        },
+        ITEM_FOUNTAIN_TRAIL_COLOUR{
+            override fun getTypeClass(): Effect = ItemFountainTrailColour()
         },
         ITEM_FOUNTAIN_LINE{
             override fun getTypeClass(): Effect = ItemFountainLine()
@@ -60,6 +69,9 @@ abstract class Effect() {
         },
         PARTICLE {
             override fun getTypeClass(): Effect = Particle()
+        },
+        PARTICLE_CIRCLE{
+            override fun getTypeClass(): Effect = ParticleCircleE()
         },
         PARTICLE_EMITTER {
             override fun getTypeClass(): Effect = ParticleEmitter()
@@ -108,6 +120,7 @@ abstract class Effect() {
                                 "An effect with the same identifier already seems to exist")
                     return
                 }
+                plugin.logger.info("load external effect ${effect.getIdentifier()} from ${plugin.name}. ")
                 this.externalEffects[effect.getIdentifier().uppercase()] = me.m64diamondstar.effectmaster.utils.Pair(effect, plugin)
             }
 

@@ -41,7 +41,7 @@ class ParticleEmitter() : Effect() {
 
             when (particle) {
 
-                Particle.REDSTONE, Particle.SPELL_MOB, Particle.SPELL_MOB_AMBIENT -> {
+                Particle.DUST -> {
                     val color = Colors.getJavaColorFromString(getSection(effectShow, id).getString("Color")!!) ?: java.awt.Color(0, 0, 0)
                     val dustOptions = Particle.DustOptions(
                         Color.fromRGB(color.red, color.green, color.blue),
@@ -74,7 +74,7 @@ class ParticleEmitter() : Effect() {
                     }, 0L, 1L)
                 }
 
-                Particle.BLOCK_CRACK, Particle.BLOCK_DUST, Particle.FALLING_DUST -> {
+                Particle.FALLING_DUST -> {
                     val material =
                         if (getSection(effectShow, id).get("Block") != null) Material.valueOf(getSection(effectShow, id).getString("Block")!!.uppercase()) else Material.STONE
 
@@ -102,6 +102,7 @@ class ParticleEmitter() : Effect() {
                     }, 0L, 1L)
                 }
 
+<<<<<<< HEAD
                 Particle.ITEM_CRACK -> {
                     val material =
                         if (getSection(effectShow, id).get("Block") != null) Material.valueOf(getSection(effectShow, id).getString("Block")!!.uppercase()) else Material.STONE
@@ -129,6 +130,9 @@ class ParticleEmitter() : Effect() {
                         c++
                     }, 0L, 1L)
                 }
+=======
+
+>>>>>>> 8Bit-edits
 
                 else -> {
                     var c = 0

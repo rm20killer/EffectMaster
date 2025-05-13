@@ -107,13 +107,12 @@ class Show(private val category: String, private val name: String) {
      * @return whether the show as a center location
      * @param location the location to play the show
      */
-    fun playAt(location: Location): Boolean {
+    fun playAt(location: Location): Boolean{
         val effectShow = EffectShow(category, name)
-        if (effectShow.centerLocation == null) {
+        if(effectShow.centerLocation == null) {
             return false
         }
         effectShow.play(null, location, false)
         return true
-
     }
 }

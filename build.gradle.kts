@@ -5,7 +5,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.20"
     id("org.jetbrains.dokka") version "1.9.20"
     id("com.gradleup.shadow") version "9.0.0-beta4"
-
 }
 
 val groupName = "me.M64DiamondStar"
@@ -33,6 +32,9 @@ repositories {
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
+    maven {
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
@@ -40,6 +42,7 @@ dependencies {
     implementation("com.bergerkiller.bukkit:TrainCarts:1.21.1-v1-SNAPSHOT")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
+    shadow("com.github.technicallycoded:FoliaLib:0.4.3")
     shadow(files("libs/particlesfx-1.21.jar"))
 }
 
@@ -65,6 +68,13 @@ tasks.processResources {
     filesMatching("plugin.yml") {
         expand("pluginVersion" to pluginVersion)
     }
+}
+
+tasks.shadowJar {
+    archiveFileName.set("EffectMaster-$pluginVersion.jar")
+    configurations = listOf(project.configurations.getByName("shadow"))
+
+    relocate("com.tcoded.folialib", "me.m64diamondstar.effectmaster.libs.folialib")
 }
 
 publishing {

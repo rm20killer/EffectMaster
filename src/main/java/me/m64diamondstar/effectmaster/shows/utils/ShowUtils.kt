@@ -1,6 +1,7 @@
 package me.m64diamondstar.effectmaster.shows.utils
 
 import me.m64diamondstar.effectmaster.EffectMaster
+import me.m64diamondstar.effectmaster.shows.EffectShow
 import org.bukkit.Bukkit
 import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Item
@@ -11,6 +12,7 @@ object ShowUtils {
 
     private val fallingBlocks = HashSet<UUID>()
     private val droppedItems = HashSet<UUID>()
+    private val runningShows = HashMap<Pair<String, String>, HashSet<EffectShow>>()
 
     fun getCategories(): ArrayList<File> {
         val file = File(EffectMaster.plugin().dataFolder, "shows")
@@ -62,6 +64,58 @@ object ShowUtils {
         )
     }
 
+    /**
+     * Get all shows which are currently running
+     * @return a set of the running shows
+     */
+    fun getRunningShows(): HashSet<EffectShow>{
+        return runningShows.values.flatten().toHashSet()
+    }
+
+    /**
+     * Get all shows which are currently running within a specific category
+     * @param category the category to search in
+     * @return a set of all the currently running shows within the given category
+     */
+    fun getRunningShows(category: String): HashSet<EffectShow>{
+        return runningShows
+            .filter { it.key.first == category }
+            .values
+            .flatten()
+            .toHashSet()
+    }
+
+    /**
+     * Get all shows which are currently running within a specific category and with a specific name
+     * @param category the category to search in
+     * @param name the name to search for
+     * @return a set of all the currently running shows within the given category
+     */
+    fun getRunningShows(category: String, name: String): HashSet<EffectShow> {
+        return runningShows
+            .filter { it.key.first == category && it.key.second == name } // Filter by category and name
+            .values // Get the corresponding HashSets
+            .flatten() // Flatten them into a single list
+            .toHashSet() // Convert to a HashSet
+    }
+
+    /**
+     * Add a show to the currently running shows
+     */
+    fun addRunningShow(category: String, name: String, effectShow: EffectShow) {
+        if(runningShows.containsKey(Pair(category, name)))
+            runningShows[Pair(category, name)]?.add(effectShow)
+        else
+            runningShows[Pair(category, name)] = hashSetOf(effectShow)
+    }
+
+    /**
+     * Remove a show from the currently running shows
+     */
+    fun removeRunningShow(category: String, name: String, effectShow: EffectShow) {
+        runningShows[Pair(category, name)]?.remove(effectShow)
+    }
+
     fun getFallingBlocks(): HashSet<FallingBlock> {
         return fallingBlocks.mapNotNull { Bukkit.getEntity(it) as FallingBlock? }.toHashSet()
     }
@@ -74,6 +128,10 @@ object ShowUtils {
         fallingBlocks.remove(fallingBlock.uniqueId)
     }
 
+    fun containsFallingBlock(fallingBlockUUID: UUID): Boolean {
+        return fallingBlocks.contains(fallingBlockUUID)
+    }
+
     fun getDroppedItems(): HashSet<Item>{
         return return droppedItems.mapNotNull { Bukkit.getEntity(it) as Item? }.toHashSet()
     }
@@ -84,6 +142,10 @@ object ShowUtils {
 
     fun removeDroppedItem(item: Item){
         droppedItems.remove(item.uniqueId)
+    }
+
+    fun containsDroppedItem(itemUUID: UUID): Boolean {
+        return droppedItems.contains(itemUUID)
     }
 
 }
